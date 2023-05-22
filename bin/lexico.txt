@@ -1,0 +1,33 @@
+1. Palabras clave:
+    auto, break, case, const, continue, default, delete, do, else, for, 
+    if, int, double, string, char, return, sizeof, switch, typedef, void, while
+
+2. Identificadores:
+    Nombres utilizados para identificar variables, funciones, clases, etc.
+
+3. Literales:
+    Números literales: enteros y de punto flotante.
+    Literales de cadena: secuencias de caracteres.
+    Literales de caracteres: representan un solo carácter.
+
+4. Operadores:
+    Aritméticos: +, -, *, /, %
+    Relacionales: ==, !=, <, >, <=, >=
+    Lógicos: &&, ||, !
+    Asignación: =
+    Incremento/Decremento: ++, --
+
+5. Separadores:
+    ; (punto y coma)
+
+6. Delimitadores:
+    { } (llaves)
+    [ ] (corchetes)
+    ( ) (paréntesis)
+
+7. Comentarios:
+    // (comentario de una línea)
+    /* */ (comentario de varias líneas)
+
+8. Directivas de preprocesador:
+    Comienzan con # y se utilizan para dar instrucciones al preprocesador.
