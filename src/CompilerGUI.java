@@ -29,7 +29,7 @@ public class CompilerGUI {
     private JButton analyzeButton;
     private DefaultTableModel tokensTableModel;
     private JTable tokensTable;
-    private JTextArea syntaxTextArea;
+    private JTextArea analysisTextArea;
     private JScrollPane tokensScrollPane;
     private JScrollPane syntaxScrollPane;
     public CompilerGUI() {
@@ -108,12 +108,18 @@ public class CompilerGUI {
         analyzeButton = new JButton("Analyze");
         analyzeButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                analysisTextArea.setText("");
                 String sourceCode = sourceCodeTextArea.getText();
                 List<Token> tokens = LexicalAnalyzer.analyze(sourceCode);
                 displayTokens(tokens);
-
+                analysisTextArea.append("Analysis Result: \n");
                 SyntacticAnalyzer syntaxAnalyzer = new SyntacticAnalyzer(tokens);
-                displaySyntaxResult(syntaxAnalyzer.analyze());
+                int errors = displayAnalysisResult(syntaxAnalyzer.analyze());
+                System.out.println(errors);
+                if(errors == 0){
+                    SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer(tokens);
+                    displayAnalysisResult(semanticAnalyzer.analyze());
+                }
 
                 frame.revalidate();
                 frame.repaint();
@@ -132,12 +138,12 @@ public class CompilerGUI {
         tokensScrollPane.setVisible(false);  // Ocultar la tabla inicialmente
         mainPanel.add(tokensScrollPane, BorderLayout.EAST);
 
-        syntaxTextArea = new JTextArea();
-        syntaxTextArea.setEditable(false);
-        syntaxTextArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        syntaxTextArea.setForeground(Color.WHITE);
-        syntaxTextArea.setBackground(Color.BLACK);
-        syntaxScrollPane = new JScrollPane(syntaxTextArea);
+        analysisTextArea = new JTextArea();
+        analysisTextArea.setEditable(false);
+        analysisTextArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        analysisTextArea.setForeground(Color.WHITE);
+        analysisTextArea.setBackground(Color.BLACK);
+        syntaxScrollPane = new JScrollPane(analysisTextArea);
         mainPanel.add(syntaxScrollPane, BorderLayout.WEST);
         syntaxScrollPane.setVisible(false);
 
@@ -177,9 +183,9 @@ public class CompilerGUI {
         syntaxScrollPane.setVisible(true);
     }
 
-    private void displaySyntaxResult(List<String> result) {
-        syntaxTextArea.setText("Syntax Analysis Result: \n");
-        result.forEach(t -> syntaxTextArea.append(t + "\n"));
+    private int displayAnalysisResult(List<String> result) {
+        result.forEach(t -> analysisTextArea.append(t + "\n"));
+        return result.size();
     }
 
     public void show() {

@@ -18,9 +18,6 @@ public class SyntacticAnalyzer {
     public List<String> analyze() {        
         while (currentPosition < tokens.size() && parseStatement()) ;
         
-        if (currentPosition >= tokens.size())
-            log("Syntax analysis completed without errors");
-        
         return analysisDetails;
     }
 
@@ -31,9 +28,6 @@ public class SyntacticAnalyzer {
                 return ifStatement();
             }else if(tokenValue.equals("else")){
                 return elseStatement();
-            } else if (tokenValue.equals("while")) {
-                // return whileStatement();                
-                return true;
             } else if (tokenValue.equals("for")) {
                 return forStatement();
             } else if (tokenValue.equals("int") || tokenValue.equals("double") || tokenValue.equals("string")) {
@@ -110,14 +104,6 @@ public class SyntacticAnalyzer {
         }
         return true;
     }
-    // private void whileStatement() {
-    //     advance();
-    //     match(TokenType.KEYWORD, "while");
-    //     match(TokenType.DELIMITER, "(");
-    //     parseExpression();
-    //     match(TokenType.DELIMITER, ")");
-    //     parseStatement();
-    // }
 
     private boolean forStatement() {
         advance();
@@ -279,7 +265,6 @@ public class SyntacticAnalyzer {
     }
 
     private void error(String message) {
-        System.out.println("Syntax Error: "+ message);
         log("Syntax Error at line: "+ currentToken.getLine()+": "+ message);
     }
     private void log(String message) {
