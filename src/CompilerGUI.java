@@ -109,8 +109,7 @@ public class CompilerGUI {
         analyzeButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String sourceCode = sourceCodeTextArea.getText();
-                LexicalAnalyzer lexicalAnalyzer = new LexicalAnalyzer(sourceCode);
-                List<Token> tokens = lexicalAnalyzer.analyze();
+                List<Token> tokens = LexicalAnalyzer.analyze(sourceCode);
                 displayTokens(tokens);
 
                 SyntacticAnalyzer syntaxAnalyzer = new SyntacticAnalyzer(tokens);

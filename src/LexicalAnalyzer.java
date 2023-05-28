@@ -3,20 +3,16 @@ import java.util.Arrays;
 import java.util.List;
 
 public class LexicalAnalyzer {
-    private String sourceCode;
-    private List<Token> tokens;
-    private int currentPosition;
+    private static String sourceCode;
+    private static List<Token> tokens = new ArrayList<>();
+    private static int currentPosition;
+    private static int currentLine;
 
-    public LexicalAnalyzer(String sourceCode) {
-        this.sourceCode = sourceCode;
-        this.tokens = new ArrayList<>();
-        this.currentPosition = 0;
-    }
-
-    public List<Token> analyze() {
+    public static List<Token> analyze(String code) {
+        sourceCode = code;
+        clear();
         while (currentPosition < sourceCode.length()) {
             char currentChar = sourceCode.charAt(currentPosition);
-
             if (Character.isLetter(currentChar)) {
                 processIdentifierOrKeyword();
             } else if (Character.isDigit(currentChar)) {
@@ -41,7 +37,10 @@ public class LexicalAnalyzer {
                 } else {
                     currentPosition++;
                 }
-            } else if (!Character.isWhitespace(currentChar)) {
+            } else if(currentChar == '\n'){
+                currentPosition++;
+                currentLine++;
+            }else if (!Character.isWhitespace(currentChar)) {
                 // Handle unrecognized characters or symbols
                 currentPosition++;
             } else {
@@ -52,7 +51,13 @@ public class LexicalAnalyzer {
         return tokens;
     }
 
-    private void processIdentifierOrKeyword() {
+    private static void clear() {
+        tokens.clear();
+        currentPosition = 0;
+        currentLine = 1;
+    }
+
+    private static void processIdentifierOrKeyword() {
         int start = currentPosition;
         currentPosition++;
 
@@ -62,15 +67,15 @@ public class LexicalAnalyzer {
 
         String identifier = sourceCode.substring(start, currentPosition);
 
-        // Check if the identifier is a keyword
+        
         if (isKeyword(identifier)) {
-            tokens.add(new Token(TokenType.KEYWORD, identifier));
+            tokens.add(new Token(TokenType.KEYWORD, identifier,currentLine));
         } else {
-            tokens.add(new Token(TokenType.IDENTIFIER, identifier));
+            tokens.add(new Token(TokenType.IDENTIFIER, identifier,currentLine));
         }
     }
 
-    private void processNumber() {
+    private static void processNumber() {
         int start = currentPosition;
         currentPosition++;
 
@@ -79,10 +84,10 @@ public class LexicalAnalyzer {
         }
 
         String number = sourceCode.substring(start, currentPosition);
-        tokens.add(new Token(TokenType.NUMBER_LITERAL, number));
+        tokens.add(new Token(TokenType.NUMBER_LITERAL, number,currentLine));
     }
 
-    private void processString() {
+    private static void processString() {
         int start = currentPosition;
         currentPosition++;
 
@@ -95,10 +100,10 @@ public class LexicalAnalyzer {
         }
 
         String str = sourceCode.substring(start, currentPosition);
-        tokens.add(new Token(TokenType.STRING_LITERAL, str));
+        tokens.add(new Token(TokenType.STRING_LITERAL, str,currentLine));
     }
 
-    private void processCharacter() {
+    private static void processCharacter() {
         int start = currentPosition;
         currentPosition++;
 
@@ -111,51 +116,57 @@ public class LexicalAnalyzer {
         }
 
         String character = sourceCode.substring(start, currentPosition);
-        tokens.add(new Token(TokenType.CHARACTER_LITERAL, character));
+        tokens.add(new Token(TokenType.CHARACTER_LITERAL, character,currentLine));
     }
 
-    private void processOperator() {
+    private static void processOperator() {
         char currentChar = sourceCode.charAt(currentPosition);
 
         if (currentChar == '+' || currentChar == '-' || currentChar == '*' || currentChar == '/' || currentChar == '%') {
-            tokens.add(new Token(TokenType.OPERATOR, String.valueOf(currentChar)));
+            tokens.add(new Token(TokenType.OPERATOR, String.valueOf(currentChar),currentLine));
             currentPosition++;
         } else if (currentChar == '=') {
             if (currentPosition + 1 < sourceCode.length() && sourceCode.charAt(currentPosition + 1) == '=') {
-                tokens.add(new Token(TokenType.OPERATOR, "=="));
+                tokens.add(new Token(TokenType.OPERATOR, "==",currentLine));
                 currentPosition += 2;
             } else {
-                tokens.add(new Token(TokenType.OPERATOR, "="));
+                tokens.add(new Token(TokenType.OPERATOR, "=",currentLine));
                 currentPosition++;
             }
         } else if (currentChar == '&') {
             if (currentPosition + 1 < sourceCode.length() && sourceCode.charAt(currentPosition + 1) == '&') {
-                tokens.add(new Token(TokenType.OPERATOR, "&&"));
+                tokens.add(new Token(TokenType.OPERATOR, "&&",currentLine));
                 currentPosition += 2;
             } else {
                 currentPosition++;
             }
         } else if (currentChar == '|') {
             if (currentPosition + 1 < sourceCode.length() && sourceCode.charAt(currentPosition + 1) == '|') {
-                tokens.add(new Token(TokenType.OPERATOR, "||"));
+                tokens.add(new Token(TokenType.OPERATOR, "||",currentLine));
                 currentPosition += 2;
             } else {
                 currentPosition++;
             }
         } else if (currentChar == '!') {
             if (currentPosition + 1 < sourceCode.length() && sourceCode.charAt(currentPosition + 1) == '=') {
-                tokens.add(new Token(TokenType.OPERATOR, "!="));
+                tokens.add(new Token(TokenType.OPERATOR, "!=",currentLine));
                 currentPosition += 2;
             } else {
-                tokens.add(new Token(TokenType.OPERATOR, "!"));
+                tokens.add(new Token(TokenType.OPERATOR, "!",currentLine));
                 currentPosition++;
             }
         } else if (currentChar == '<' || currentChar == '>') {
             if (currentPosition + 1 < sourceCode.length() && sourceCode.charAt(currentPosition + 1) == '=') {
-                tokens.add(new Token(TokenType.OPERATOR, String.valueOf(currentChar) + "="));
+                tokens.add(new Token(TokenType.OPERATOR, String.valueOf(currentChar) + "=",currentLine));
                 currentPosition += 2;
-            } else {
-                tokens.add(new Token(TokenType.OPERATOR, String.valueOf(currentChar)));
+            } else if(currentPosition + 1 < sourceCode.length() && currentChar == '<' && sourceCode.charAt(currentPosition+1) == '<'){
+                tokens.add(new Token(TokenType.OPERATOR, "<<",currentLine));
+                currentPosition += 2;
+            }else if(currentPosition + 1 < sourceCode.length() && currentChar == '>' && sourceCode.charAt(currentPosition+1) == '>'){
+                tokens.add(new Token(TokenType.OPERATOR, ">>",currentLine));
+                currentPosition += 2;
+            }else {
+                tokens.add(new Token(TokenType.OPERATOR, String.valueOf(currentChar),currentLine));
                 currentPosition++;
             }
         } else {
@@ -163,18 +174,18 @@ public class LexicalAnalyzer {
         }
     }
 
-    private void processSeparator(TokenType tokenType, String value) {
-        tokens.add(new Token(tokenType, value));
+    private static void processSeparator(TokenType tokenType, String value) {
+        tokens.add(new Token(tokenType, value,currentLine));
         currentPosition++;
     }
 
-    private void processDelimiter() {
+    private static void processDelimiter() {
         char currentChar = sourceCode.charAt(currentPosition);
-        tokens.add(new Token(TokenType.DELIMITER, String.valueOf(currentChar)));
+        tokens.add(new Token(TokenType.DELIMITER, String.valueOf(currentChar),currentLine));
         currentPosition++;
     }
 
-    private void processPreprocessorDirective() {
+    private static void processPreprocessorDirective() {
         int start = currentPosition;
         currentPosition++;
 
@@ -183,10 +194,10 @@ public class LexicalAnalyzer {
         }
 
         String directive = sourceCode.substring(start, currentPosition);
-        tokens.add(new Token(TokenType.PREPROCESSOR_DIRECTIVE, directive));
+        tokens.add(new Token(TokenType.PREPROCESSOR_DIRECTIVE, directive,currentLine));
     }
 
-    private void processSingleLineComment() {
+    private static void processSingleLineComment() {
         int start = currentPosition;
         currentPosition += 2; // Skip the "//" characters
 
@@ -195,10 +206,10 @@ public class LexicalAnalyzer {
         }
 
         String comment = sourceCode.substring(start, currentPosition);
-        tokens.add(new Token(TokenType.COMMENT, comment));
+        tokens.add(new Token(TokenType.COMMENT, comment,currentLine));
     }
 
-    private void processMultiLineComment() {
+    private static void processMultiLineComment() {
         int start = currentPosition;
         currentPosition += 2; // Skip the "/*" characters
 
@@ -211,19 +222,19 @@ public class LexicalAnalyzer {
         }
 
         String comment = sourceCode.substring(start, currentPosition);
-        tokens.add(new Token(TokenType.COMMENT, comment));
+        tokens.add(new Token(TokenType.COMMENT, comment,currentLine));
     }
-
-    private boolean isOperator(char c) {
+    
+    private static boolean isOperator(char c) {
         return c == '+' || c == '-' || c == '*' || c == '/' || c == '%' || c == '=' || c == '&' || c == '|' || c == '!' || c == '<' || c == '>';
     }
 
-    private boolean isDelimiter(char c) {
-        return c == ';' || c == ',' || c == '{' || c == '}' || c == '[' || c == ']';
+    private static boolean isDelimiter(char c) {
+        return c == ';' || c == ',' || c == '{' || c == '}' || c == '[' || c == ']' || c == '(' || c == ')';
     }
 
-    private boolean isKeyword(String identifier) {
-        List<String> keywords = Arrays.asList("auto", "break", "case", "const", "continue", "default", "delete", "do", "else", "for", "if", "int", "double", "string", "char", "return", "switch", "void", "while");
+    private static boolean isKeyword(String identifier) {
+        List<String> keywords = Arrays.asList("auto", "break", "case", "const", "continue", "default", "delete", "do", "else", "for", "if", "int", "double", "string", "char", "return", "switch", "void", "while", "cout", "cin", "endl");
         return keywords.contains(identifier);
     }
 }
